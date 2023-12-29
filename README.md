@@ -1,88 +1,44 @@
 # tamashii
 
 <!-- toc -->
-
-- [Usage](#usage)
-- [Commands](#commands)
+* [tamashii](#tamashii)
+* [Usage](#usage)
+* [Commands](#commands)
 <!-- tocstop -->
 
 # Usage
 
 <!-- usage -->
-
 ```sh-session
 $ npm install -g tamashii
 $ tamashii COMMAND
 running command...
 $ tamashii (--version)
-tamashii/0.0.0 darwin-arm64 node-v20.8.0
+tamashii/0.0.1 darwin-arm64 node-v20.8.0
 $ tamashii --help [COMMAND]
 USAGE
   $ tamashii COMMAND
 ...
 ```
-
 <!-- usagestop -->
 
 # Commands
 
 <!-- commands -->
-
-- [`tamashii hello PERSON`](#tamashii-hello-person)
-- [`tamashii hello world`](#tamashii-hello-world)
-- [`tamashii help [COMMANDS]`](#tamashii-help-commands)
-- [`tamashii plugins`](#tamashii-plugins)
-- [`tamashii plugins:install PLUGIN...`](#tamashii-pluginsinstall-plugin)
-- [`tamashii plugins:inspect PLUGIN...`](#tamashii-pluginsinspect-plugin)
-- [`tamashii plugins:install PLUGIN...`](#tamashii-pluginsinstall-plugin-1)
-- [`tamashii plugins:link PLUGIN`](#tamashii-pluginslink-plugin)
-- [`tamashii plugins:uninstall PLUGIN...`](#tamashii-pluginsuninstall-plugin)
-- [`tamashii plugins reset`](#tamashii-plugins-reset)
-- [`tamashii plugins:uninstall PLUGIN...`](#tamashii-pluginsuninstall-plugin-1)
-- [`tamashii plugins:uninstall PLUGIN...`](#tamashii-pluginsuninstall-plugin-2)
-- [`tamashii plugins update`](#tamashii-plugins-update)
-
-## `tamashii hello PERSON`
-
-Say hello
-
-```
-USAGE
-  $ tamashii hello PERSON -f <value>
-
-ARGUMENTS
-  PERSON  Person to say hello to
-
-FLAGS
-  -f, --from=<value>  (required) Who is saying hello
-
-DESCRIPTION
-  Say hello
-
-EXAMPLES
-  $ oex hello friend --from oclif
-  hello friend from oclif! (./src/commands/hello/index.ts)
-```
-
-_See code: [src/commands/hello/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.0/src/commands/hello/index.ts)_
-
-## `tamashii hello world`
-
-Say hello world
-
-```
-USAGE
-  $ tamashii hello world
-
-DESCRIPTION
-  Say hello world
-
-EXAMPLES
-  $ tamashii hello world
-  hello world! (./src/commands/hello/world.ts)
-```
-
-_See code: [src/commands/hello/world.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.0/src/commands/hello/world.ts)_
+* [`tamashii help [COMMANDS]`](#tamashii-help-commands)
+* [`tamashii link SOURCE`](#tamashii-link-source)
+* [`tamashii plugins`](#tamashii-plugins)
+* [`tamashii plugins:install PLUGIN...`](#tamashii-pluginsinstall-plugin)
+* [`tamashii plugins:inspect PLUGIN...`](#tamashii-pluginsinspect-plugin)
+* [`tamashii plugins:install PLUGIN...`](#tamashii-pluginsinstall-plugin-1)
+* [`tamashii plugins:link PLUGIN`](#tamashii-pluginslink-plugin)
+* [`tamashii plugins:uninstall PLUGIN...`](#tamashii-pluginsuninstall-plugin)
+* [`tamashii plugins reset`](#tamashii-plugins-reset)
+* [`tamashii plugins:uninstall PLUGIN...`](#tamashii-pluginsuninstall-plugin-1)
+* [`tamashii plugins:uninstall PLUGIN...`](#tamashii-pluginsuninstall-plugin-2)
+* [`tamashii plugins update`](#tamashii-plugins-update)
+* [`tamashii refresh [PACKAGE]`](#tamashii-refresh-package)
+* [`tamashii sync [PACKAGE]`](#tamashii-sync-package)
 
 ## `tamashii help [COMMANDS]`
 
@@ -103,6 +59,32 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.20/src/commands/help.ts)_
+
+## `tamashii link SOURCE`
+
+Link package
+
+```
+USAGE
+  $ tamashii link SOURCE [--installFlags <value>] [--npm] [--verbose]
+
+ARGUMENTS
+  SOURCE  Package path
+
+FLAGS
+  --installFlags=<value>  Flags to pass "yarn add" or "npm install"
+  --npm                   Use npm instead of yarn
+  --verbose               Print verbose output
+
+DESCRIPTION
+  Link package
+
+EXAMPLES
+  $ oex hello friend --from oclif
+  hello friend from oclif! (./src/commands/hello/index.ts)
+```
+
+_See code: [src/commands/link/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.1/src/commands/link/index.ts)_
 
 ## `tamashii plugins`
 
@@ -162,7 +144,7 @@ ALIASES
   $ tamashii plugins add
 
 EXAMPLES
-  $ tamashii plugins add myplugin
+  $ tamashii plugins add myplugin 
 
   $ tamashii plugins add https://github.com/someuser/someplugin
 
@@ -231,7 +213,7 @@ ALIASES
   $ tamashii plugins add
 
 EXAMPLES
-  $ tamashii plugins install myplugin
+  $ tamashii plugins install myplugin 
 
   $ tamashii plugins install https://github.com/someuser/someplugin
 
@@ -379,4 +361,49 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v4.1.10/src/commands/plugins/update.ts)_
 
+## `tamashii refresh [PACKAGE]`
+
+Refresh package in node_modules
+
+```
+USAGE
+  $ tamashii refresh [PACKAGE]
+
+ARGUMENTS
+  PACKAGE  Package name
+
+DESCRIPTION
+  Refresh package in node_modules
+
+EXAMPLES
+  $ oex hello friend --from oclif
+  hello friend from oclif! (./src/commands/hello/index.ts)
+```
+
+_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.1/src/commands/refresh/index.ts)_
+
+## `tamashii sync [PACKAGE]`
+
+Sync local package from source
+
+```
+USAGE
+  $ tamashii sync [PACKAGE] [--npm] [--verbose]
+
+ARGUMENTS
+  PACKAGE  Target package name to sync
+
+FLAGS
+  --npm      Use npm instead of yarn
+  --verbose  Print verbose output
+
+DESCRIPTION
+  Sync local package from source
+
+EXAMPLES
+  $ oex hello friend --from oclif
+  hello friend from oclif! (./src/commands/hello/index.ts)
+```
+
+_See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.1/src/commands/sync/index.ts)_
 <!-- commandsstop -->

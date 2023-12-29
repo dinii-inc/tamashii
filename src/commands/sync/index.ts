@@ -10,9 +10,17 @@ import {
   TAMASHII_POOLS_DIR,
 } from "../../utils/constants.js";
 import { execAsync } from "../../utils/cp.js";
-import { ensureDirectory, isSymbolicLink } from "../../utils/fs.js";
+import { ensureDirectory, isDirectory, isSymbolicLink } from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
 import { syncFiles } from "../../utils/sync-files.js";
+
+type Options = {
+  cwd: string;
+  npm: boolean | undefined;
+  verbose: boolean | undefined;
+};
+
+const processedLinkPromises = new Map<string, Promise<void>>();
 
 export default class Sync extends Command {
   static args = {
@@ -41,15 +49,33 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     verbose: Flags.boolean({ description: "Print verbose output" }),
   };
 
-  static syncSingle = async (
-    self: Command,
-    packageName: string,
-    options: {
-      cwd: string;
-      npm: boolean | undefined;
-      verbose: boolean | undefined;
-    },
-  ) => {
+  static syncAll = async (self: Command, packages: string[], options: Options) => {
+    await Promise.all(
+      packages
+        .filter((name) => name !== ".gitkeep")
+        .map(async (packageName) => {
+          const absCwd = options.cwd.startsWith("/")
+            ? options.cwd
+            : path.resolve(process.cwd(), options.cwd);
+
+          const key = [absCwd, packageName].join(";");
+
+          const processed = processedLinkPromises.get(key);
+          if (processed) {
+            return processed;
+          }
+
+          const promise = (async () => {
+            await Sync.syncSingle(self, packageName, options);
+            self.log(`Synced "${packageName}" successfully at ${absCwd}`);
+          })();
+
+          processedLinkPromises.set(key, promise);
+        }),
+    );
+  };
+
+  static syncSingle = async (self: Command, packageName: string, options: Options) => {
     // eslint-disable-next-line prefer-destructuring
     const cwd = options.cwd;
     const link = path.join(cwd, TAMASHII_LINKS_DIR, packageName);
@@ -63,6 +89,14 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     if ("error" in isSymbolicLinkRes) {
       self.warn(`Skipped "${packageName}" as "${link}" is not a valid symlink`);
       return;
+    }
+
+    const source = path.resolve(path.dirname(link), await fs.readlink(link));
+    if ("data" in (await isDirectory(path.join(source, ".tamashii")))) {
+      await this.syncAll(self, await fs.readdir(path.join(source, TAMASHII_LINKS_DIR)), {
+        ...options,
+        cwd: source,
+      });
     }
 
     await ensureDirectory(pool);
@@ -92,19 +126,14 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const { args, flags } = await this.parse(Sync);
     const cwd = flags.cwd ?? process.cwd();
 
-    const packages = args.package ? [args.package] : await fs.readdir(TAMASHII_LINKS_DIR);
+    const packages = args.package
+      ? [args.package]
+      : await fs.readdir(path.join(cwd, TAMASHII_LINKS_DIR));
 
-    await Promise.all(
-      packages
-        .filter((name) => name !== ".gitkeep")
-        .map(async (packageName) => {
-          await Sync.syncSingle(this, packageName, {
-            cwd,
-            npm: flags.npm,
-            verbose: flags.verbose,
-          });
-          this.log(`Synced "${packageName}" successfully`);
-        }),
-    );
+    await Sync.syncAll(this, packages, {
+      cwd,
+      npm: flags.npm,
+      verbose: flags.verbose,
+    });
   }
 }

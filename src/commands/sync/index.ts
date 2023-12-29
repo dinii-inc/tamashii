@@ -79,7 +79,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const pool = path.join(cwd, TAMASHII_POOLS_DIR, packageName);
     const pkg = path.join(cwd, TAMASHII_DIR, packageName);
 
-    if (cwd.includes(TAMASHII_DIR)) {
+    if (cwd.includes(TAMASHII_DIR) || cwd.includes("node_modules")) {
       return;
     }
 

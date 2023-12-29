@@ -7,10 +7,8 @@ export const TAMASHII_GITIGNORE = `\
 !/.gitignore
 !/.links
 !/.pools
-/.links/*
 /.pools/*
 !/.pools/.gitkeep
-!/.links/.gitkeep
 `;
 
 export const SCRIPTS_PRE_SYNC = "tamashii:pre-sync";

@@ -12,6 +12,7 @@ import {
 import { execAsync } from "../../utils/cp.js";
 import { ensureDirectory, isDirectory, isSymbolicLink } from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
+import { toAbsolute } from "../../utils/path.js";
 import { syncFiles } from "../../utils/sync-files.js";
 
 type Options = {
@@ -54,10 +55,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
       packages
         .filter((name) => name !== ".gitkeep")
         .map(async (packageName) => {
-          const absCwd = options.cwd.startsWith("/")
-            ? options.cwd
-            : path.resolve(process.cwd(), options.cwd);
-
+          const absCwd = toAbsolute(options.cwd);
           const key = [absCwd, packageName].join(";");
 
           const processed = processedLinkPromises.get(key);
@@ -76,11 +74,14 @@ Consider placing this command in the "preinstall" section of npm scripts so that
   };
 
   static syncSingle = async (self: Command, packageName: string, options: Options) => {
-    // eslint-disable-next-line prefer-destructuring
-    const cwd = options.cwd;
+    const cwd = toAbsolute(options.cwd);
     const link = path.join(cwd, TAMASHII_LINKS_DIR, packageName);
     const pool = path.join(cwd, TAMASHII_POOLS_DIR, packageName);
     const pkg = path.join(cwd, TAMASHII_DIR, packageName);
+
+    if (cwd.includes(TAMASHII_DIR)) {
+      return;
+    }
 
     // NOTE: This step will be skipped in an environment where the target of the "src" symlink does not exist,
     // such as Cloud Build. However, dependencies will be resolved properly, as necessary files are updated

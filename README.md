@@ -29,7 +29,7 @@ $ npm install -g @dinii-inc/tamashii
 $ tamashii COMMAND
 running command...
 $ tamashii (--version)
-@dinii-inc/tamashii/0.0.4 darwin-arm64 node-v20.8.0
+@dinii-inc/tamashii/1.0.0 darwin-arm64 node-v20.8.0
 $ tamashii --help [COMMAND]
 USAGE
   $ tamashii COMMAND
@@ -102,7 +102,7 @@ EXAMPLES
   $ tamashii init
 ```
 
-_See code: [src/commands/init/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.4/src/commands/init/index.ts)_
+_See code: [src/commands/init/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.0.0/src/commands/init/index.ts)_
 
 ## `tamashii link SOURCE`
 
@@ -128,7 +128,7 @@ EXAMPLES
   $ tamashii link ../path/to/your/internal/package
 ```
 
-_See code: [src/commands/link/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.4/src/commands/link/index.ts)_
+_See code: [src/commands/link/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.0.0/src/commands/link/index.ts)_
 
 ## `tamashii refresh [PACKAGE]`
 
@@ -162,7 +162,7 @@ EXAMPLES
   $ tamashii refresh your-internal-package
 ```
 
-_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.4/src/commands/refresh/index.ts)_
+_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.0.0/src/commands/refresh/index.ts)_
 
 ## `tamashii sync [PACKAGE]`
 
@@ -200,5 +200,5 @@ EXAMPLES
   $ tamashii sync your-internal-package
 ```
 
-_See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.4/src/commands/sync/index.ts)_
+_See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.0.0/src/commands/sync/index.ts)_
 <!-- commandsstop -->

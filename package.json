@@ -1,7 +1,7 @@
 {
   "name": "tamashii",
   "version": "0.0.0",
-  "description": "tamashii is a internal package manager for private monorepo",
+  "description": "tamashii is an internal package manager for private monorepo",
   "author": "dinii-inc",
   "license": "MIT",
   "homepage": "https://github.com/dinii-inc/tamashii",

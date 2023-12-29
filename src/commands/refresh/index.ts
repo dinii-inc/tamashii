@@ -43,7 +43,8 @@ Consider placing this command in the "prepare" section of npm scripts to ensure 
       .map(([packageName, version]) => ({ packageName, version }))
       .filter(
         ({ packageName, version }) =>
-          version.startsWith("file:") && (args.package ? packageName === args.package : true),
+          version.startsWith("file:.tamashii") &&
+          (args.package ? packageName === args.package : true),
       );
 
     targets.map(async ({ packageName, version }) => {

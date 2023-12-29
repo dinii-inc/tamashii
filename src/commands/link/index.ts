@@ -42,6 +42,7 @@ export default class Link extends Command {
 
     const link = path.join(cwd, TAMASHII_LINKS_DIR, packageJson.name);
 
+    await fs.rm(link, { force: true });
     await fs.symlink(path.relative(path.dirname(link), src), link);
 
     await Sync.syncSingle(this, packageJson.name, {

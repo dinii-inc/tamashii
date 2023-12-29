@@ -1,4 +1,4 @@
-import childProcess from "node:child_process";
+import * as childProcess from "node:child_process";
 
 export const execAsync = (command: string, options: childProcess.ExecOptions, verbose?: boolean) =>
   new Promise<void>((resolve, reject) => {

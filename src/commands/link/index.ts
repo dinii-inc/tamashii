@@ -1,11 +1,12 @@
 import { Args, Command, Flags } from "@oclif/core";
-import fs from "node:fs/promises";
-import path from "node:path";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 
 import { TAMASHII_DIR, TAMASHII_LINKS_DIR } from "../../utils/constants.js";
 import { execAsync } from "../../utils/cp.js";
-import { getPackageJson, isDirectory } from "../../utils/fs.js";
-import { sync } from "../sync/index.js";
+import { isDirectory } from "../../utils/fs.js";
+import { getPackageJson } from "../../utils/package-json.js";
+import Sync from "../sync/index.js";
 
 export default class Link extends Command {
   static args = {
@@ -14,13 +15,10 @@ export default class Link extends Command {
 
   static description = "Link package";
 
-  static examples = [
-    `$ oex hello friend --from oclif
-hello friend from oclif! (./src/commands/hello/index.ts)
-`,
-  ];
+  static examples = [`TODO`];
 
   static flags = {
+    cwd: Flags.string({ description: "Current working directory of the child process" }),
     installFlags: Flags.string({ description: `Flags to pass "yarn add" or "npm install"` }),
     npm: Flags.boolean({ description: "Use npm instead of yarn" }),
     verbose: Flags.boolean({ description: "Print verbose output" }),
@@ -28,8 +26,10 @@ hello friend from oclif! (./src/commands/hello/index.ts)
 
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Link);
+    const cwd = flags.cwd ?? process.cwd();
 
-    const src = path.resolve(process.cwd(), args.source);
+    const src = path.resolve(cwd, args.source);
+
     const isDirectoryRes = await isDirectory(src);
     if ("error" in isDirectoryRes) {
       this.error("source is not a valid directory");
@@ -40,11 +40,12 @@ hello friend from oclif! (./src/commands/hello/index.ts)
       this.error("source does not have a valid package.json");
     }
 
-    const link = path.join(TAMASHII_LINKS_DIR, packageJson.name);
+    const link = path.join(cwd, TAMASHII_LINKS_DIR, packageJson.name);
 
     await fs.symlink(path.relative(path.dirname(link), src), link);
 
-    await sync(this, packageJson.name, {
+    await Sync.syncSingle(this, packageJson.name, {
+      cwd,
       npm: flags.npm,
       verbose: flags.verbose,
     });
@@ -52,7 +53,7 @@ hello friend from oclif! (./src/commands/hello/index.ts)
     const yarn = flags.npm ? "npm install" : "yarn add";
     await execAsync(
       `${yarn} ${flags.installFlags ?? ""} file:${path.join(TAMASHII_DIR, packageJson.name)}`,
-      {},
+      { cwd },
       flags.verbose,
     );
 

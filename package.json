@@ -1,5 +1,5 @@
 {
-  "name": "tamashii",
+  "name": "@dinii-inc/tamashii",
   "version": "0.0.1",
   "description": "tamashii is an internal package manager for private monorepo",
   "author": "dinii-inc",
@@ -47,6 +47,7 @@
     "mocha": "^10",
     "oclif": "^4.1.0",
     "shx": "^0.3.4",
+    "sinon": "^17.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5"
   },

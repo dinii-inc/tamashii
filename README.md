@@ -13,11 +13,10 @@ To use JavaScript packages within the same monorepo in a private monorepo, there
 "tamashii" resolves these challenges with just a few simple commands.
 
 <!-- toc -->
-
-- [tamashii](#tamashii)
-- [How tamashii helps your work](#how-tamashii-helps-your-work)
-- [Usage](#usage)
-- [Commands](#commands)
+* [tamashii](#tamashii)
+* [How tamashii helps your work](#how-tamashii-helps-your-work)
+* [Usage](#usage)
+* [Commands](#commands)
 <!-- tocstop -->
 
 # Usage
@@ -25,19 +24,17 @@ To use JavaScript packages within the same monorepo in a private monorepo, there
 ## Installation
 
 <!-- usage -->
-
 ```sh-session
 $ npm install -g @dinii-inc/tamashii
 $ tamashii COMMAND
 running command...
 $ tamashii (--version)
-@dinii-inc/tamashii/0.0.1 darwin-arm64 node-v20.8.0
+@dinii-inc/tamashii/0.0.2 darwin-arm64 node-v20.8.0
 $ tamashii --help [COMMAND]
 USAGE
   $ tamashii COMMAND
 ...
 ```
-
 <!-- usagestop -->
 
 ## Integration
@@ -61,12 +58,11 @@ It is recommended to add `tamashii refresh` and `tamashii sync` to npm scripts s
 # Commands
 
 <!-- commands -->
-
-- [`tamashii help [COMMANDS]`](#tamashii-help-commands)
-- [`tamashii init`](#tamashii-init)
-- [`tamashii link SOURCE`](#tamashii-link-source)
-- [`tamashii refresh [PACKAGE]`](#tamashii-refresh-package)
-- [`tamashii sync [PACKAGE]`](#tamashii-sync-package)
+* [`tamashii help [COMMANDS]`](#tamashii-help-commands)
+* [`tamashii init`](#tamashii-init)
+* [`tamashii link SOURCE`](#tamashii-link-source)
+* [`tamashii refresh [PACKAGE]`](#tamashii-refresh-package)
+* [`tamashii sync [PACKAGE]`](#tamashii-sync-package)
 
 ## `tamashii help [COMMANDS]`
 
@@ -106,7 +102,7 @@ EXAMPLES
   $ tamashii init
 ```
 
-_See code: [src/commands/init/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.1/src/commands/init/index.ts)_
+_See code: [src/commands/init/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.2/src/commands/init/index.ts)_
 
 ## `tamashii link SOURCE`
 
@@ -132,7 +128,7 @@ EXAMPLES
   $ tamashii link ../path/to/your/internal/package
 ```
 
-_See code: [src/commands/link/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.1/src/commands/link/index.ts)_
+_See code: [src/commands/link/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.2/src/commands/link/index.ts)_
 
 ## `tamashii refresh [PACKAGE]`
 
@@ -166,7 +162,7 @@ EXAMPLES
   $ tamashii refresh your-internal-package
 ```
 
-_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.1/src/commands/refresh/index.ts)_
+_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.2/src/commands/refresh/index.ts)_
 
 ## `tamashii sync [PACKAGE]`
 
@@ -204,6 +200,5 @@ EXAMPLES
   $ tamashii sync your-internal-package
 ```
 
-_See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.1/src/commands/sync/index.ts)_
-
+_See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v0.0.2/src/commands/sync/index.ts)_
 <!-- commandsstop -->

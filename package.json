@@ -1,6 +1,6 @@
 {
   "name": "@dinii-inc/tamashii",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "tamashii assists in resolving internal packages within a monorepo, particularly for private repositories.",
   "author": "dinii-inc",
   "license": "MIT",

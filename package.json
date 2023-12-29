@@ -1,0 +1,73 @@
+{
+  "name": "tamashii",
+  "version": "0.0.0",
+  "description": "tamashii is a internal package manager for private monorepo",
+  "author": "dinii-inc",
+  "license": "MIT",
+  "homepage": "https://github.com/dinii-inc/tamashii",
+  "repository": "dinii-inc/tamashii",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bin": {
+    "tamashii": "./bin/run.js"
+  },
+  "main": "",
+  "files": [
+    "/bin",
+    "/dist",
+    "/oclif.manifest.json"
+  ],
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "lint": "eslint . --ext .ts",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "posttest": "yarn lint",
+    "prepack": "yarn build && oclif manifest && oclif readme",
+    "prepare": "yarn build",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif readme && git add README.md"
+  },
+  "dependencies": {
+    "@oclif/core": "^3",
+    "@oclif/plugin-help": "^5",
+    "@oclif/plugin-plugins": "^4"
+  },
+  "devDependencies": {
+    "@oclif/prettier-config": "^0.2.1",
+    "@oclif/test": "^3",
+    "@types/chai": "^4",
+    "@types/mocha": "^10",
+    "@types/node": "^18",
+    "chai": "^4",
+    "eslint": "^8",
+    "eslint-config-oclif": "^5",
+    "eslint-config-oclif-typescript": "^3",
+    "eslint-config-prettier": "^9.1.0",
+    "mocha": "^10",
+    "oclif": "^4.1.0",
+    "shx": "^0.3.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
+  },
+  "oclif": {
+    "bin": "tamashii",
+    "dirname": "tamashii",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topicSeparator": " ",
+    "topics": {
+      "hello": {
+        "description": "Say hello to the world and others"
+      }
+    }
+  },
+  "bugs": "https://github.com/dinii-inc/tamashii/issues",
+  "keywords": [],
+  "types": "dist/index.d.ts",
+  "exports": "./lib/index.js",
+  "type": "module"
+}

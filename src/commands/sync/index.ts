@@ -93,7 +93,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     }
 
     const source = path.resolve(path.dirname(link), await fs.readlink(link));
-    if ("data" in (await isDirectory(path.join(source, ".tamashii")))) {
+    if ("data" in (await isDirectory(path.join(source, TAMASHII_DIR)))) {
       await this.syncAll(self, await fs.readdir(path.join(source, TAMASHII_LINKS_DIR)), {
         ...options,
         cwd: source,
@@ -126,6 +126,11 @@ Consider placing this command in the "preinstall" section of npm scripts so that
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Sync);
     const cwd = flags.cwd ?? process.cwd();
+
+    if ("error" in (await isDirectory(path.join(cwd, TAMASHII_DIR)))) {
+      this.log(`Skipped tamashii sync as ${cwd} is not initialized.`);
+      return;
+    }
 
     const packages = args.package
       ? [args.package]

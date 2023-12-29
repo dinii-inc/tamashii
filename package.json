@@ -1,7 +1,7 @@
 {
   "name": "@dinii-inc/tamashii",
   "version": "0.0.1",
-  "description": "tamashii is an internal package manager for private monorepo",
+  "description": "tamashii assists in resolving internal packages within a monorepo, particularly for private repositories.",
   "author": "dinii-inc",
   "license": "MIT",
   "homepage": "https://github.com/dinii-inc/tamashii",
@@ -56,15 +56,8 @@
     "dirname": "tamashii",
     "commands": "./dist/commands",
     "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-plugins"
-    ],
-    "topicSeparator": " ",
-    "topics": {
-      "hello": {
-        "description": "Say hello to the world and others"
-      }
-    }
+      "@oclif/plugin-help"
+    ]
   },
   "bugs": "https://github.com/dinii-inc/tamashii/issues",
   "keywords": [],

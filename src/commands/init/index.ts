@@ -14,7 +14,7 @@ export default class Init extends Command {
 
   static description = "Initialize tamashii directories";
 
-  static examples = [`TODO`];
+  static examples = ["tamashii init"];
 
   static flags = {
     cwd: Flags.string({ description: "Current working directory of the child process" }),

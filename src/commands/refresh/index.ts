@@ -9,9 +9,20 @@ export default class Refresh extends Command {
     package: Args.string({ description: "Package name" }),
   };
 
-  static description = "Refresh package in node_modules";
+  static description = `\
+Refreshes package in node_modules
 
-  static examples = [`TODO`];
+At times, yarn may not update the content under "node_modules" even if changes are made to locally installed packages using "file:[path to package]" instead of a specific version number.
+In such cases, it may be necessary to delete the entire contents of "node_modules" and then re-run "yarn install".
+This command resolves the issue by copying files directly from the source to "node_modules".
+
+Consider placing this command in the "prepare" section of npm scripts to ensure that the content under "node_modules" is always kept up to date.
+`;
+
+  static examples = [
+    "tamashii refresh # all packages will be refreshed",
+    "tamashii refresh your-internal-package",
+  ];
 
   static flags = {
     cwd: Flags.string({ description: "Current working directory of the child process" }),

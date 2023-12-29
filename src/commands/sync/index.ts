@@ -19,9 +19,21 @@ export default class Sync extends Command {
     package: Args.string({ description: "Target package name to sync" }),
   };
 
-  static description = "Sync local package from source";
+  static description = `\
+Syncs local packages from source
 
-  static examples = [`TODO`];
+This updates package builds under ".tamashii" based on the source code linked via symbolic link in ".tamashii/.links".
+To reflect the latest builds in node_modules, where you have installed internal packages, you need to execute "tamashii refresh".
+
+This also prevents the copying of the "node_modules" directory within the source directory that contains "devDependencies".
+
+Consider placing this command in the "preinstall" section of npm scripts so that the required builds are prepared even during the initial run of yarn in the package directory where you have installed internal packages.
+`;
+
+  static examples = [
+    "tamashii sync # all packages will be synced",
+    "tamashii sync your-internal-package",
+  ];
 
   static flags = {
     cwd: Flags.string({ description: "Current working directory of the child process" }),
@@ -44,7 +56,7 @@ export default class Sync extends Command {
     const pool = path.join(cwd, TAMASHII_POOLS_DIR, packageName);
     const pkg = path.join(cwd, TAMASHII_DIR, packageName);
 
-    // NOTE: This step will be skipped in an environment where the target of the 'src' symlink does not exist,
+    // NOTE: This step will be skipped in an environment where the target of the "src" symlink does not exist,
     // such as Cloud Build. However, dependencies will be resolved properly, as necessary files are updated
     // along with other source files, if you run this command before uploading files.
     const isSymbolicLinkRes = isSymbolicLink(link);

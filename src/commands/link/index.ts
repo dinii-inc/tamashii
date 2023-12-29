@@ -13,9 +13,9 @@ export default class Link extends Command {
     source: Args.string({ description: "Package path", required: true }),
   };
 
-  static description = "Link package";
+  static description = "Links package";
 
-  static examples = [`TODO`];
+  static examples = ["tamashii link ../path/to/your/internal/package"];
 
   static flags = {
     cwd: Flags.string({ description: "Current working directory of the child process" }),

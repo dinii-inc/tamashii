@@ -95,14 +95,16 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const packages = args.package ? [args.package] : await fs.readdir(TAMASHII_LINKS_DIR);
 
     await Promise.all(
-      packages.map(async (packageName) => {
-        await Sync.syncSingle(this, packageName, {
-          cwd,
-          npm: flags.npm,
-          verbose: flags.verbose,
-        });
-        this.log(`Synced "${packageName}" successfully`);
-      }),
+      packages
+        .filter((name) => name !== ".gitkeep")
+        .map(async (packageName) => {
+          await Sync.syncSingle(this, packageName, {
+            cwd,
+            npm: flags.npm,
+            verbose: flags.verbose,
+          });
+          this.log(`Synced "${packageName}" successfully`);
+        }),
     );
   }
 }

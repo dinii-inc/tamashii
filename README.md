@@ -29,7 +29,7 @@ $ npm install -g @dinii-inc/tamashii
 $ tamashii COMMAND
 running command...
 $ tamashii (--version)
-@dinii-inc/tamashii/1.2.3 darwin-arm64 node-v20.8.0
+@dinii-inc/tamashii/1.2.4 darwin-arm64 node-v20.8.0
 $ tamashii --help [COMMAND]
 USAGE
   $ tamashii COMMAND
@@ -60,9 +60,7 @@ It is recommended to add `tamashii refresh` and `tamashii sync` to npm scripts s
 <!-- commands -->
 * [`tamashii help [COMMANDS]`](#tamashii-help-commands)
 * [`tamashii init`](#tamashii-init)
-* [`tamashii link SOURCE`](#tamashii-link-source)
 * [`tamashii refresh [PACKAGE]`](#tamashii-refresh-package)
-* [`tamashii sync [PACKAGE]`](#tamashii-sync-package)
 * [`tamashii zip SOURCE`](#tamashii-zip-source)
 
 ## `tamashii help [COMMANDS]`
@@ -103,33 +101,7 @@ EXAMPLES
   $ tamashii init
 ```
 
-_See code: [src/commands/init/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.2.3/src/commands/init/index.ts)_
-
-## `tamashii link SOURCE`
-
-Links package
-
-```
-USAGE
-  $ tamashii link SOURCE [--cwd <value>] [--installFlags <value>] [--npm] [--verbose]
-
-ARGUMENTS
-  SOURCE  Package path
-
-FLAGS
-  --cwd=<value>           Current working directory of the child process
-  --installFlags=<value>  Flags to pass "yarn add" or "npm install"
-  --npm                   Use npm instead of yarn
-  --verbose               Print verbose output
-
-DESCRIPTION
-  Links package
-
-EXAMPLES
-  $ tamashii link ../path/to/your/internal/package
-```
-
-_See code: [src/commands/link/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.2.3/src/commands/link/index.ts)_
+_See code: [src/commands/init/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.2.4/src/commands/init/index.ts)_
 
 ## `tamashii refresh [PACKAGE]`
 
@@ -163,45 +135,7 @@ EXAMPLES
   $ tamashii refresh your-internal-package
 ```
 
-_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.2.3/src/commands/refresh/index.ts)_
-
-## `tamashii sync [PACKAGE]`
-
-Syncs local packages from source
-
-```
-USAGE
-  $ tamashii sync [PACKAGE] [--cwd <value>] [--npm] [--verbose]
-
-ARGUMENTS
-  PACKAGE  Target package name to sync
-
-FLAGS
-  --cwd=<value>  Current working directory of the child process
-  --npm          Use npm instead of yarn
-  --verbose      Print verbose output
-
-DESCRIPTION
-  Syncs local packages from source
-
-  This updates package builds under ".tamashii" based on the source code linked via symbolic link in ".tamashii/.links".
-  To reflect the latest builds in node_modules, where you have installed internal packages, you need to execute
-  "tamashii refresh".
-
-  This also prevents the copying of the "node_modules" directory within the source directory that contains
-  "devDependencies".
-
-  Consider placing this command in the "preinstall" section of npm scripts so that the required builds are prepared even
-  during the initial run of yarn in the package directory where you have installed internal packages.
-
-
-EXAMPLES
-  $ tamashii sync # all packages will be synced
-
-  $ tamashii sync your-internal-package
-```
-
-_See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.2.3/src/commands/sync/index.ts)_
+_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.2.4/src/commands/refresh/index.ts)_
 
 ## `tamashii zip SOURCE`
 
@@ -221,5 +155,5 @@ EXAMPLES
   $ tamashii zip ../path/to/your/internal/package
 ```
 
-_See code: [src/commands/zip/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.2.3/src/commands/zip/index.ts)_
+_See code: [src/commands/zip/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.2.4/src/commands/zip/index.ts)_
 <!-- commandsstop -->

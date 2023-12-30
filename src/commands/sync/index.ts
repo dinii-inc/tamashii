@@ -1,6 +1,7 @@
 import { Args, Command, Flags } from "@oclif/core";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import PQueue from "p-queue";
 import * as tar from "tar";
 
 import {
@@ -24,6 +25,8 @@ type Options = {
 };
 
 const processedLinkPromises = new Map<string, Promise<void>>();
+
+const queue = new PQueue({ concurrency: 1 });
 
 export default class Sync extends Command {
   static args = {
@@ -120,7 +123,9 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const packageJson = await getPackageJson(pool);
     const hasPreRefresh = Boolean(packageJson?.scripts?.[SCRIPTS_PRE_SYNC]);
     if (hasPreRefresh) {
-      await execAsync(`${yarn} --production=false`, { cwd: pool }, options.verbose);
+      await queue.add(() =>
+        execAsync(`${yarn} --production=false`, { cwd: pool }, options.verbose),
+      );
       await execAsync(`${yarn} ${SCRIPTS_PRE_SYNC}`, { cwd: pool }, options.verbose);
     }
 

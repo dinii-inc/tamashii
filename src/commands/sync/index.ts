@@ -111,7 +111,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     if ("data" in (await isFile(path.join(pool, TAMASHII_ARCHIVE_FILE)))) {
       await tar.extract({
         cwd: pool,
-        file: TAMASHII_ARCHIVE_FILE,
+        file: path.join(pool, TAMASHII_ARCHIVE_FILE),
       });
     }
 

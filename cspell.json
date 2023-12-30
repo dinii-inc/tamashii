@@ -1,6 +1,6 @@
 {
   "version": "0.2",
   "language": "en",
-  "words": ["dinii", "oclif", "tamashii"],
+  "words": ["dinii", "oclif", "preinstall", "tamashii"],
   "ignorePaths": ["node_modules", "dist", "document.gen.ts"]
 }

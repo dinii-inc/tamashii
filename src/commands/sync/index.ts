@@ -1,18 +1,20 @@
 import { Args, Command, Flags } from "@oclif/core";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import * as tar from "tar";
 
 import {
   SCRIPTS_POST_SYNC,
   SCRIPTS_PRE_SYNC,
+  TAMASHII_ARCHIVE_FILE,
   TAMASHII_DIR,
   TAMASHII_LINKS_DIR,
   TAMASHII_POOLS_DIR,
 } from "../../utils/constants.js";
 import { execAsync } from "../../utils/cp.js";
-import { ensureDirectory, isDirectory, isSymbolicLink } from "../../utils/fs.js";
+import { ensureDirectory, isDirectory, isFile, isSymbolicLink } from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
-import { toAbsolute } from "../../utils/path.js";
+import { resolveNormalizedPackageName, toAbsolute } from "../../utils/path.js";
 import { syncFiles } from "../../utils/sync-files.js";
 
 type Options = {
@@ -79,6 +81,8 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const pool = path.join(cwd, TAMASHII_POOLS_DIR, packageName);
     const pkg = path.join(cwd, TAMASHII_DIR, packageName);
 
+    const yarn = options.npm ? "npm run" : "yarn";
+
     if (cwd.includes(TAMASHII_DIR) || cwd.includes("node_modules")) {
       return;
     }
@@ -88,7 +92,8 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     // along with other source files, if you run this command before uploading files.
     const isSymbolicLinkRes = isSymbolicLink(link);
     if ("error" in isSymbolicLinkRes) {
-      self.warn(`Skipped "${packageName}" as "${link}" is not a valid symlink`);
+      const name = resolveNormalizedPackageName(packageName);
+      self.warn(`Skipped "${name}" as "${link}" is not a valid symlink`);
       return;
     }
 
@@ -103,7 +108,12 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     await ensureDirectory(pool);
     await syncFiles({ dist: pool, src: link });
 
-    const yarn = options.npm ? "npm run" : "yarn";
+    if ("data" in (await isFile(path.join(pool, TAMASHII_ARCHIVE_FILE)))) {
+      await tar.extract({
+        cwd: pool,
+        file: TAMASHII_ARCHIVE_FILE,
+      });
+    }
 
     const packageJson = await getPackageJson(pool);
     const hasPreRefresh = Boolean(packageJson?.scripts?.[SCRIPTS_PRE_SYNC]);

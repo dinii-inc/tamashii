@@ -6,6 +6,7 @@ import { TAMASHII_DIR, TAMASHII_LINKS_DIR } from "../../utils/constants.js";
 import { execAsync } from "../../utils/cp.js";
 import { isDirectory } from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
+import { normalizePackageName } from "../../utils/path.js";
 import Sync from "../sync/index.js";
 
 export default class Link extends Command {
@@ -27,8 +28,9 @@ export default class Link extends Command {
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Link);
     const cwd = flags.cwd ?? process.cwd();
-
     const src = path.resolve(cwd, args.source);
+
+    const yarnAdd = flags.npm ? "npm install" : "yarn add";
 
     const isDirectoryRes = await isDirectory(src);
     if ("error" in isDirectoryRes) {
@@ -40,20 +42,20 @@ export default class Link extends Command {
       this.error("source does not have a valid package.json");
     }
 
-    const link = path.join(cwd, TAMASHII_LINKS_DIR, packageJson.name);
+    const packageName = normalizePackageName(packageJson.name);
+    const link = path.join(cwd, TAMASHII_LINKS_DIR, packageName);
 
     await fs.rm(link, { force: true });
     await fs.symlink(path.relative(path.dirname(link), src), link);
 
-    await Sync.syncSingle(this, packageJson.name, {
+    await Sync.syncSingle(this, packageName, {
       cwd,
       npm: flags.npm,
       verbose: flags.verbose,
     });
 
-    const yarn = flags.npm ? "npm install" : "yarn add";
     await execAsync(
-      `${yarn} ${flags.installFlags ?? ""} file:${path.join(TAMASHII_DIR, packageJson.name)}`,
+      `${yarnAdd} ${flags.installFlags ?? ""} file:${path.join(TAMASHII_DIR, packageName)}`,
       { cwd },
       flags.verbose,
     );

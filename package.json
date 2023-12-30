@@ -30,7 +30,8 @@
   },
   "dependencies": {
     "@oclif/core": "^3",
-    "@oclif/plugin-help": "^5"
+    "@oclif/plugin-help": "^5",
+    "tar": "^6.2.0"
   },
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",
@@ -38,6 +39,7 @@
     "@types/chai": "^4",
     "@types/mocha": "^10",
     "@types/node": "^18",
+    "@types/tar": "^6.1.10",
     "chai": "^4",
     "eslint": "^8",
     "eslint-config-oclif": "^5",

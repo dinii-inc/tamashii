@@ -137,7 +137,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const { args, flags } = await this.parse(Sync);
     const cwd = flags.cwd ?? process.cwd();
 
-    if ("error" in (await isDirectory(path.join(cwd, TAMASHII_DIR)))) {
+    if ("error" in (await isDirectory(path.join(cwd, TAMASHII_LINKS_DIR)))) {
       this.log(`Skipped tamashii sync as ${cwd} is not initialized.`);
       return;
     }

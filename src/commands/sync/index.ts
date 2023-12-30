@@ -71,6 +71,8 @@ Consider placing this command in the "preinstall" section of npm scripts so that
           })();
 
           processedLinkPromises.set(key, promise);
+
+          await promise;
         }),
     );
   };
@@ -98,7 +100,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     }
 
     const source = path.resolve(path.dirname(link), await fs.readlink(link));
-    if ("data" in (await isDirectory(path.join(source, TAMASHII_DIR)))) {
+    if ("data" in (await isDirectory(path.join(source, TAMASHII_LINKS_DIR)))) {
       await this.syncAll(self, await fs.readdir(path.join(source, TAMASHII_LINKS_DIR)), {
         ...options,
         cwd: source,

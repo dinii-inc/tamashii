@@ -17,7 +17,7 @@ import {
 import { execAsync } from "../../utils/cp.js";
 import { ensureDirectory, isDirectory, isFile, isSymbolicLink } from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
-import { resolveNormalizedPackageName, toAbsolute } from "../../utils/path.js";
+import { toAbsolute } from "../../utils/path.js";
 import { syncFiles } from "../../utils/sync-files.js";
 
 type Options = {

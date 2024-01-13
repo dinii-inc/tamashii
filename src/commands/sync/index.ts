@@ -1,4 +1,5 @@
 import { Args, Command, Flags } from "@oclif/core";
+import { hashElement } from "folder-hash";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import PQueue from "p-queue";
@@ -9,6 +10,7 @@ import {
   SCRIPTS_PRE_SYNC,
   TAMASHII_ARCHIVE_FILE,
   TAMASHII_DIR,
+  TAMASHII_HASH_FILE,
   TAMASHII_LINKS_DIR,
   TAMASHII_POOLS_DIR,
 } from "../../utils/constants.js";
@@ -69,8 +71,23 @@ Consider placing this command in the "preinstall" section of npm scripts so that
           }
 
           const promise = (async () => {
-            await Sync.syncSingle(self, packageName, options);
-            self.log(`Synced "${packageName}" successfully at ${absCwd}`);
+            const result = await Sync.syncSingle(self, packageName, options);
+            switch (result) {
+              case "skipped": {
+                self.log(`Skipped "${packageName}" as no change is detected at ${absCwd}`);
+                break;
+              }
+
+              case "invalid-symlink": {
+                self.warn(`Skipped "${packageName}" due to invalid symbolic link at ${absCwd}`);
+                break;
+              }
+
+              case "synced": {
+                self.log(`Synced "${packageName}" successfully at ${absCwd}`);
+                break;
+              }
+            }
           })();
 
           processedLinkPromises.set(key, promise);
@@ -89,7 +106,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const yarn = options.npm ? "npm run" : "yarn";
 
     if (cwd.includes(TAMASHII_DIR) || cwd.includes("node_modules")) {
-      return;
+      return "ignored";
     }
 
     // NOTE: This step will be skipped in an environment where the target of the "src" symlink does not exist,
@@ -97,9 +114,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     // along with other source files, if you run this command before uploading files.
     const isSymbolicLinkRes = isSymbolicLink(link);
     if ("error" in isSymbolicLinkRes) {
-      const name = resolveNormalizedPackageName(packageName);
-      self.warn(`Skipped "${name}" as "${link}" is not a valid symlink`);
-      return;
+      return "invalid-symlink";
     }
 
     const source = path.resolve(path.dirname(link), await fs.readlink(link));
@@ -111,6 +126,38 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     }
 
     await ensureDirectory(pool);
+    await ensureDirectory(pkg);
+
+    const packageJson = await getPackageJson(pool);
+    const hasPreRefresh = Boolean(packageJson?.scripts?.[SCRIPTS_PRE_SYNC]);
+    const dirToPackage = hasPreRefresh ? packageJson?.tamashii?.dist ?? "dist" : null;
+
+    const hashFile = path.join(pkg, TAMASHII_HASH_FILE);
+    const previousHash =
+      "data" in (await isFile(hashFile)) ? await fs.readFile(hashFile, "utf8") : null;
+
+    const { hash: currentHash } = await hashElement(source, {
+      encoding: "hex",
+      files: {
+        exclude: ["**/.DS_Store", "*.log"],
+      },
+      folders: {
+        exclude: [
+          "**/node_modules",
+          "**/.vscode",
+          "**/.git",
+          "**/.tamashii",
+          ...(dirToPackage ? [dirToPackage] : []),
+        ],
+        matchBasename: true,
+        matchPath: true,
+      },
+    });
+
+    if (previousHash === currentHash) {
+      return "skipped";
+    }
+
     await syncFiles({ dist: pool, src: link });
 
     if ("data" in (await isFile(path.join(pool, TAMASHII_ARCHIVE_FILE)))) {
@@ -120,8 +167,6 @@ Consider placing this command in the "preinstall" section of npm scripts so that
       });
     }
 
-    const packageJson = await getPackageJson(pool);
-    const hasPreRefresh = Boolean(packageJson?.scripts?.[SCRIPTS_PRE_SYNC]);
     if (hasPreRefresh) {
       await queue.add(() =>
         execAsync(`${yarn} --production=false`, { cwd: pool }, options.verbose),
@@ -129,15 +174,18 @@ Consider placing this command in the "preinstall" section of npm scripts so that
       await execAsync(`${yarn} ${SCRIPTS_PRE_SYNC}`, { cwd: pool }, options.verbose);
     }
 
-    await ensureDirectory(pkg);
     await syncFiles({
       dist: pkg,
-      src: hasPreRefresh ? path.join(pool, packageJson?.tamashii?.dist ?? "dist") : pool,
+      src: dirToPackage ? path.join(pool, dirToPackage) : pool,
     });
 
     if (packageJson?.scripts?.[SCRIPTS_POST_SYNC]) {
       await execAsync(`${yarn} ${SCRIPTS_POST_SYNC}`, { cwd: pkg }, options.verbose);
     }
+
+    await fs.writeFile(hashFile, currentHash);
+
+    return "synced";
   };
 
   async run(): Promise<void> {

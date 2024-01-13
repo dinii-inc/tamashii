@@ -31,6 +31,7 @@
   "dependencies": {
     "@oclif/core": "^3",
     "@oclif/plugin-help": "^5",
+    "folder-hash": "^4.0.4",
     "p-queue": "^8.0.1",
     "tar": "^6.2.0"
   },
@@ -38,6 +39,7 @@
     "@oclif/prettier-config": "^0.2.1",
     "@oclif/test": "^3",
     "@types/chai": "^4",
+    "@types/folder-hash": "^4.0.4",
     "@types/mocha": "^10",
     "@types/node": "^18",
     "@types/tar": "^6.1.10",

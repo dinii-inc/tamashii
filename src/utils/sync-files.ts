@@ -22,6 +22,7 @@ export const syncFiles = async ({ dist, src }: { dist: string; src: string }) =>
       .map((file) =>
         fs.cp(path.join(src, file), path.join(dist, file), {
           dereference: true,
+          filter: (source) => !source.endsWith("node_modules"),
           force: true,
           recursive: true,
         }),

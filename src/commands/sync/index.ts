@@ -22,6 +22,7 @@ import { syncFiles } from "../../utils/sync-files.js";
 
 type Options = {
   cwd: string;
+  force: boolean | undefined;
   npm: boolean | undefined;
   verbose: boolean | undefined;
 };
@@ -53,6 +54,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
 
   static flags = {
     cwd: Flags.string({ description: "Current working directory of the child process" }),
+    force: Flags.boolean({ description: "never skip even if no changes detected at source" }),
     npm: Flags.boolean({ description: "Use npm instead of yarn" }),
     verbose: Flags.boolean({ description: "Print verbose output" }),
   };
@@ -104,8 +106,10 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const pkg = path.join(cwd, TAMASHII_DIR, packageName);
 
     const yarn = options.npm ? "npm run" : "yarn";
+    const isInPool = cwd.includes(TAMASHII_DIR);
+    const force = options.force || isInPool;
 
-    if (cwd.includes(TAMASHII_DIR) || cwd.includes("node_modules")) {
+    if (cwd.includes("node_modules")) {
       return "ignored";
     }
 
@@ -113,28 +117,24 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     // such as Cloud Build. However, dependencies will be resolved properly, as necessary files are updated
     // along with other source files, if you run this command before uploading files.
     const isSymbolicLinkRes = isSymbolicLink(link);
-    if ("error" in isSymbolicLinkRes) {
+    if (!isInPool && "error" in isSymbolicLinkRes) {
       return "invalid-symlink";
-    }
-
-    const source = path.resolve(path.dirname(link), await fs.readlink(link));
-    if ("data" in (await isDirectory(path.join(source, TAMASHII_LINKS_DIR)))) {
-      await this.syncAll(self, await fs.readdir(path.join(source, TAMASHII_LINKS_DIR)), {
-        ...options,
-        cwd: source,
-      });
     }
 
     await ensureDirectory(pool);
     await ensureDirectory(pkg);
 
-    const packageJson = await getPackageJson(pool);
+    const source = isInPool ? link : path.resolve(path.dirname(link), await fs.readlink(link));
+    const packageJson = await getPackageJson(source);
     const hasPreRefresh = Boolean(packageJson?.scripts?.[SCRIPTS_PRE_SYNC]);
     const dirToPackage = hasPreRefresh ? packageJson?.tamashii?.dist ?? "dist" : null;
 
     const hashFile = path.join(pkg, TAMASHII_HASH_FILE);
-    const previousHash =
-      "data" in (await isFile(hashFile)) ? await fs.readFile(hashFile, "utf8") : null;
+    const previousHash = isInPool
+      ? null
+      : "data" in (await isFile(hashFile))
+      ? await fs.readFile(hashFile, "utf8")
+      : null;
 
     const { hash: currentHash } = await hashElement(source, {
       encoding: "hex",
@@ -154,11 +154,18 @@ Consider placing this command in the "preinstall" section of npm scripts so that
       },
     });
 
-    if (previousHash === currentHash) {
+    if (!force && previousHash === currentHash) {
       return "skipped";
     }
 
     await syncFiles({ dist: pool, src: link });
+
+    if ("data" in (await isDirectory(path.join(pool, TAMASHII_LINKS_DIR)))) {
+      await this.syncAll(self, await fs.readdir(path.join(pool, TAMASHII_LINKS_DIR)), {
+        ...options,
+        cwd: pool,
+      });
+    }
 
     if ("data" in (await isFile(path.join(pool, TAMASHII_ARCHIVE_FILE)))) {
       await tar.extract({
@@ -203,6 +210,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
 
     await Sync.syncAll(this, packages, {
       cwd,
+      force: flags.force,
       npm: flags.npm,
       verbose: flags.verbose,
     });

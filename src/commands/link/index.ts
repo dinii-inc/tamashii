@@ -50,6 +50,7 @@ export default class Link extends Command {
 
     await Sync.syncSingle(this, packageName, {
       cwd,
+      force: true,
       npm: flags.npm,
       verbose: flags.verbose,
     });

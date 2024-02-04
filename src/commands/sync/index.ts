@@ -145,10 +145,13 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const syncChildren = async () => {
       const sourceLinksDir = path.join(source, TAMASHII_LINKS_DIR);
       const intermediateLinksDir = path.join(intermediate, TAMASHII_LINKS_DIR);
+      const intermediatePackagesDir = path.join(intermediate, TAMASHII_PACKAGES_DIR);
 
       if ("data" in (await isDirectory(sourceLinksDir))) {
         const [childLinks] = await Promise.all([
-          fs.readdir(sourceLinksDir).then((links) => links.filter((name) => name !== ".gitkeep")),
+          fs
+            .readdir(sourceLinksDir)
+            .then((links) => links.filter((name) => name !== ".gitkeep").sort()),
           prepareTamashii({ cwd: intermediate }),
         ]);
 
@@ -161,18 +164,29 @@ Consider placing this command in the "preinstall" section of npm scripts so that
           }),
         );
 
-        return this.syncAll(self, childLinks, { ...options, cwd: intermediate });
+        const result = await this.syncAll(self, childLinks, { ...options, cwd: intermediate });
+        const hashes = await Promise.all(
+          childLinks.map(async (name) => {
+            const hashFile = path.join(intermediatePackagesDir, name, TAMASHII_HASH_FILE);
+            return readFileSafely(hashFile);
+          }),
+        );
+
+        return { hashes, result };
       }
 
-      return [];
+      return { hashes: [], result: [] };
     };
 
-    const childResults = await syncChildren();
-    const isChildSynced = childResults.includes("synced");
+    const childResult = await syncChildren();
+    const isChildSynced = childResult.result.includes("synced");
 
     const hashFile = path.join(pkg, TAMASHII_HASH_FILE);
     const previousHash = await readFileSafely(hashFile);
-    const currentHash = await Sync.calculateHash({ dirToPackage, source });
+    const currentHash = [
+      await Sync.calculateHash({ dirToPackage, source }),
+      ...childResult.hashes,
+    ].join("\n");
 
     if (!options.force && !isChildSynced && previousHash === currentHash) {
       return "skipped";

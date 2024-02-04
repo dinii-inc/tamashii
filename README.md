@@ -62,6 +62,7 @@ It is recommended to add `tamashii refresh` and `tamashii sync` to npm scripts s
 * [`tamashii link SOURCE`](#tamashii-link-source)
 * [`tamashii refresh [PACKAGE]`](#tamashii-refresh-package)
 * [`tamashii sync [PACKAGE]`](#tamashii-sync-package)
+* [`tamashii vscode`](#tamashii-vscode)
 * [`tamashii zip SOURCE`](#tamashii-zip-source)
 
 ## `tamashii help [COMMANDS]`
@@ -182,6 +183,20 @@ EXAMPLES
 ```
 
 _See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.1/src/commands/sync/index.ts)_
+
+## `tamashii vscode`
+
+Shows instruction to make your development experience with tamashii and VSCode more comfortable
+
+```
+USAGE
+  $ tamashii vscode
+
+DESCRIPTION
+  Shows instruction to make your development experience with tamashii and VSCode more comfortable
+```
+
+_See code: [src/commands/vscode/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.1/src/commands/vscode/index.ts)_
 
 ## `tamashii zip SOURCE`
 

@@ -76,3 +76,6 @@ export const ensureFile = async (target: string, content: string, encoding: Buff
     await fs.writeFile(target, content, encoding);
   }
 };
+
+export const readFileSafely = async (target: string) =>
+  "data" in (await isFile(target)) ? fs.readFile(target, "utf8") : null;

@@ -11,13 +11,21 @@ import {
   TAMASHII_ARCHIVE_FILE,
   TAMASHII_DIR,
   TAMASHII_HASH_FILE,
+  TAMASHII_INTERMEDIATE_DIR,
   TAMASHII_LINKS_DIR,
-  TAMASHII_POOLS_DIR,
+  TAMASHII_PACKAGES_DIR,
 } from "../../utils/constants.js";
 import { execAsync } from "../../utils/cp.js";
-import { ensureDirectory, isDirectory, isFile, isSymbolicLink } from "../../utils/fs.js";
+import {
+  ensureDirectory,
+  isDirectory,
+  isFile,
+  isSymbolicLink,
+  readFileSafely,
+} from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
 import { toAbsolute } from "../../utils/path.js";
+import { prepareTamashii } from "../../utils/prepare.js";
 import { syncFiles } from "../../utils/sync-files.js";
 
 type Options = {
@@ -27,7 +35,8 @@ type Options = {
   verbose: boolean | undefined;
 };
 
-const processedLinkPromises = new Map<string, Promise<void>>();
+type SyncResult = "ignored" | "invalid-symlink" | "skipped" | "synced";
+const processedLinkPromises = new Map<string, Promise<SyncResult>>();
 
 const queue = new PQueue({ concurrency: 1 });
 
@@ -59,8 +68,8 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     verbose: Flags.boolean({ description: "Print verbose output" }),
   };
 
-  static syncAll = async (self: Command, packages: string[], options: Options) => {
-    await Promise.all(
+  static syncAll = async (self: Command, packages: string[], options: Options) =>
+    Promise.all(
       packages
         .filter((name) => name !== ".gitkeep")
         .map(async (packageName) => {
@@ -90,24 +99,28 @@ Consider placing this command in the "preinstall" section of npm scripts so that
                 break;
               }
             }
+
+            return result;
           })();
 
           processedLinkPromises.set(key, promise);
 
-          await promise;
+          return promise;
         }),
     );
-  };
 
   static syncSingle = async (self: Command, packageName: string, options: Options) => {
     const cwd = toAbsolute(options.cwd);
-    const link = path.join(cwd, TAMASHII_LINKS_DIR, packageName);
-    const pool = path.join(cwd, TAMASHII_POOLS_DIR, packageName);
-    const pkg = path.join(cwd, TAMASHII_DIR, packageName);
 
-    const yarn = options.npm ? "npm run" : "yarn";
-    const isInPool = cwd.includes(TAMASHII_DIR);
-    const force = options.force || isInPool;
+    await prepareTamashii({ cwd });
+
+    const link = path.join(cwd, TAMASHII_LINKS_DIR, packageName);
+    const intermediate = path.join(cwd, TAMASHII_INTERMEDIATE_DIR, packageName);
+    const pkg = path.join(cwd, TAMASHII_PACKAGES_DIR, packageName);
+
+    const install = options.npm ? "npm install" : "yarn";
+    const runScript = options.npm ? "npm run" : "yarn";
+    const isInIntermediateDir = cwd.includes(TAMASHII_DIR);
 
     if (cwd.includes("node_modules")) {
       return "ignored";
@@ -116,27 +129,100 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     // NOTE: This step will be skipped in an environment where the target of the "src" symlink does not exist,
     // such as Cloud Build. However, dependencies will be resolved properly, as necessary files are updated
     // along with other source files, if you run this command before uploading files.
-    const isSymbolicLinkRes = isSymbolicLink(link);
-    if (!isInPool && "error" in isSymbolicLinkRes) {
+    if (!isInIntermediateDir && "error" in isSymbolicLink(link)) {
       return "invalid-symlink";
     }
 
-    await ensureDirectory(pool);
-    await ensureDirectory(pkg);
+    await Promise.all([ensureDirectory(intermediate), ensureDirectory(pkg)]);
 
-    const source = isInPool ? link : path.resolve(path.dirname(link), await fs.readlink(link));
+    const source = isInIntermediateDir
+      ? link
+      : path.resolve(path.dirname(link), await fs.readlink(link));
     const packageJson = await getPackageJson(source);
     const hasPreRefresh = Boolean(packageJson?.scripts?.[SCRIPTS_PRE_SYNC]);
     const dirToPackage = hasPreRefresh ? packageJson?.tamashii?.dist ?? "dist" : null;
 
-    const hashFile = path.join(pkg, TAMASHII_HASH_FILE);
-    const previousHash = isInPool
-      ? null
-      : "data" in (await isFile(hashFile))
-      ? await fs.readFile(hashFile, "utf8")
-      : null;
+    const syncChildren = async () => {
+      const sourceLinksDir = path.join(source, TAMASHII_LINKS_DIR);
+      const intermediateLinksDir = path.join(intermediate, TAMASHII_LINKS_DIR);
 
-    const { hash: currentHash } = await hashElement(source, {
+      if ("data" in (await isDirectory(sourceLinksDir))) {
+        const [childLinks] = await Promise.all([
+          fs.readdir(sourceLinksDir).then((links) => links.filter((name) => name !== ".gitkeep")),
+          prepareTamashii({ cwd: intermediate }),
+        ]);
+
+        await Promise.all(
+          childLinks.map(async (name) => {
+            const src = path.join(sourceLinksDir, name);
+            const dist = path.join(intermediateLinksDir, name);
+            await ensureDirectory(dist);
+            return syncFiles({ dist, hard: true, src });
+          }),
+        );
+
+        return this.syncAll(self, childLinks, { ...options, cwd: intermediate });
+      }
+
+      return [];
+    };
+
+    const childResults = await syncChildren();
+    const isChildSynced = childResults.includes("synced");
+
+    const hashFile = path.join(pkg, TAMASHII_HASH_FILE);
+    const previousHash = await readFileSafely(hashFile);
+    const currentHash = await Sync.calculateHash({ dirToPackage, source });
+
+    if (!options.force && !isChildSynced && previousHash === currentHash) {
+      return "skipped";
+    }
+
+    await syncFiles({ dist: intermediate, hard: true, src: link });
+
+    if ("data" in (await isFile(path.join(intermediate, TAMASHII_ARCHIVE_FILE)))) {
+      await tar.extract({
+        cwd: intermediate,
+        file: path.join(intermediate, TAMASHII_ARCHIVE_FILE),
+      });
+    }
+
+    if (hasPreRefresh) {
+      await queue.add(() =>
+        execAsync(
+          `${install} --production=false`,
+          { cwd: intermediate, env: { ...process.env, SKIP_TAMASHII_SYNC: "yes" } },
+          options.verbose,
+        ),
+      );
+      await execAsync(`${runScript} ${SCRIPTS_PRE_SYNC}`, { cwd: intermediate }, options.verbose);
+    }
+
+    await syncFiles({
+      dist: pkg,
+      hard: true,
+      src: dirToPackage ? path.join(intermediate, dirToPackage) : intermediate,
+    });
+
+    if (packageJson?.scripts?.[SCRIPTS_POST_SYNC]) {
+      await execAsync(`${runScript} ${SCRIPTS_POST_SYNC}`, { cwd: pkg }, options.verbose);
+    }
+
+    if (currentHash) {
+      await fs.writeFile(hashFile, currentHash);
+    }
+
+    return "synced";
+  };
+
+  private static calculateHash = async ({
+    dirToPackage,
+    source,
+  }: {
+    dirToPackage: null | string;
+    source: string;
+  }) => {
+    const { hash } = await hashElement(source, {
       encoding: "hex",
       files: {
         exclude: ["**/.DS_Store", "*.log"],
@@ -154,50 +240,17 @@ Consider placing this command in the "preinstall" section of npm scripts so that
       },
     });
 
-    if (!force && previousHash === currentHash) {
-      return "skipped";
-    }
-
-    await syncFiles({ dist: pool, src: link });
-
-    if ("data" in (await isDirectory(path.join(pool, TAMASHII_LINKS_DIR)))) {
-      await this.syncAll(self, await fs.readdir(path.join(pool, TAMASHII_LINKS_DIR)), {
-        ...options,
-        cwd: pool,
-      });
-    }
-
-    if ("data" in (await isFile(path.join(pool, TAMASHII_ARCHIVE_FILE)))) {
-      await tar.extract({
-        cwd: pool,
-        file: path.join(pool, TAMASHII_ARCHIVE_FILE),
-      });
-    }
-
-    if (hasPreRefresh) {
-      await queue.add(() =>
-        execAsync(`${yarn} --production=false`, { cwd: pool }, options.verbose),
-      );
-      await execAsync(`${yarn} ${SCRIPTS_PRE_SYNC}`, { cwd: pool }, options.verbose);
-    }
-
-    await syncFiles({
-      dist: pkg,
-      src: dirToPackage ? path.join(pool, dirToPackage) : pool,
-    });
-
-    if (packageJson?.scripts?.[SCRIPTS_POST_SYNC]) {
-      await execAsync(`${yarn} ${SCRIPTS_POST_SYNC}`, { cwd: pkg }, options.verbose);
-    }
-
-    await fs.writeFile(hashFile, currentHash);
-
-    return "synced";
+    return hash;
   };
 
   async run(): Promise<void> {
     const { args, flags } = await this.parse(Sync);
     const cwd = flags.cwd ?? process.cwd();
+
+    if (process.env.SKIP_TAMASHII_SYNC === "yes") {
+      this.log(`Skipped tamashii sync as SKIP_TAMASHII_SYNC is "yes"`);
+      return;
+    }
 
     if ("error" in (await isDirectory(path.join(cwd, TAMASHII_LINKS_DIR)))) {
       this.log(`Skipped tamashii sync as ${cwd} is not initialized.`);

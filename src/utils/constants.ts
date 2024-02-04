@@ -1,14 +1,12 @@
 export const TAMASHII_DIR = ".tamashii";
 export const TAMASHII_LINKS_DIR = ".tamashii/.links";
-export const TAMASHII_POOLS_DIR = ".tamashii/.pools";
+export const TAMASHII_INTERMEDIATE_DIR = ".tamashii/.intermediate";
+export const TAMASHII_PACKAGES_DIR = ".tamashii/.packages";
 
 export const TAMASHII_GITIGNORE = `\
 /*
 !/.gitignore
 !/.links
-!/.pools
-/.pools/*
-!/.pools/.gitkeep
 `;
 
 export const TAMASHII_ARCHIVE_FILE = ".tamashii.tar.gz";

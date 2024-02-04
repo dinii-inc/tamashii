@@ -1,6 +1,8 @@
 import { Args, Command, Flags } from "@oclif/core";
 import * as path from "node:path";
 
+import { TAMASHII_HASH_FILE, TAMASHII_PACKAGES_DIR } from "../../utils/constants.js";
+import { readFileSafely } from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
 import { syncFiles } from "../../utils/sync-files.js";
 
@@ -43,7 +45,7 @@ Consider placing this command in the "prepare" section of npm scripts to ensure 
       .map(([packageName, version]) => ({ packageName, version }))
       .filter(
         ({ packageName, version }) =>
-          version.startsWith("file:.tamashii") &&
+          version.startsWith(`file:${TAMASHII_PACKAGES_DIR}`) &&
           (args.package ? packageName === args.package : true),
       );
 
@@ -51,8 +53,17 @@ Consider placing this command in the "prepare" section of npm scripts to ensure 
       const src = version.replace("file:", "");
       const dist = path.join(cwd, "node_modules", packageName);
 
-      await syncFiles({ dist, src });
+      const [currentHash, previousHash] = await Promise.all([
+        readFileSafely(path.join(dist, TAMASHII_HASH_FILE)),
+        readFileSafely(path.join(src, TAMASHII_HASH_FILE)),
+      ]);
 
+      if (currentHash === previousHash) {
+        this.log(`Skipped refreshing "${packageName}"`);
+        return;
+      }
+
+      await syncFiles({ dist, hard: true, src });
       this.log(`Refreshed "${packageName}" successfully`);
     });
   }

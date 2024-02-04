@@ -2,7 +2,7 @@ import { Args, Command, Flags } from "@oclif/core";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
-import { TAMASHII_DIR, TAMASHII_LINKS_DIR } from "../../utils/constants.js";
+import { TAMASHII_LINKS_DIR, TAMASHII_PACKAGES_DIR } from "../../utils/constants.js";
 import { execAsync } from "../../utils/cp.js";
 import { isDirectory } from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
@@ -30,7 +30,7 @@ export default class Link extends Command {
     const cwd = flags.cwd ?? process.cwd();
     const src = path.resolve(cwd, args.source);
 
-    const yarnAdd = flags.npm ? "npm install" : "yarn add";
+    const install = flags.npm ? "npm install" : "yarn add";
 
     const isDirectoryRes = await isDirectory(src);
     if ("error" in isDirectoryRes) {
@@ -55,11 +55,8 @@ export default class Link extends Command {
       verbose: flags.verbose,
     });
 
-    await execAsync(
-      `${yarnAdd} ${flags.installFlags ?? ""} file:${path.join(TAMASHII_DIR, packageName)}`,
-      { cwd },
-      flags.verbose,
-    );
+    const pkg = path.join(TAMASHII_PACKAGES_DIR, packageName);
+    await execAsync(`${install} ${flags.installFlags ?? ""} file:${pkg}`, { cwd }, flags.verbose);
 
     this.log(`Linked "${packageJson.name}" successfully`);
   }

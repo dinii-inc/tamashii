@@ -59,7 +59,6 @@ It is recommended to add `tamashii refresh` and `tamashii sync` to npm scripts s
 
 <!-- commands -->
 * [`tamashii help [COMMANDS]`](#tamashii-help-commands)
-* [`tamashii init`](#tamashii-init)
 * [`tamashii link SOURCE`](#tamashii-link-source)
 * [`tamashii refresh [PACKAGE]`](#tamashii-refresh-package)
 * [`tamashii sync [PACKAGE]`](#tamashii-sync-package)
@@ -84,26 +83,6 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.20/src/commands/help.ts)_
-
-## `tamashii init`
-
-Initialize tamashii directories
-
-```
-USAGE
-  $ tamashii init [--cwd <value>]
-
-FLAGS
-  --cwd=<value>  Current working directory of the child process
-
-DESCRIPTION
-  Initialize tamashii directories
-
-EXAMPLES
-  $ tamashii init
-```
-
-_See code: [src/commands/init/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.3.1/src/commands/init/index.ts)_
 
 ## `tamashii link SOURCE`
 

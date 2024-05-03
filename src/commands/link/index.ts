@@ -7,6 +7,7 @@ import { execAsync } from "../../utils/cp.js";
 import { isDirectory } from "../../utils/fs.js";
 import { getPackageJson } from "../../utils/package-json.js";
 import { normalizePackageName } from "../../utils/path.js";
+import { prepareTamashii } from "../../utils/prepare.js";
 import Sync from "../sync/index.js";
 
 export default class Link extends Command {
@@ -31,6 +32,8 @@ export default class Link extends Command {
     const src = path.resolve(cwd, args.source);
 
     const install = flags.npm ? "npm install" : "yarn add";
+
+    await prepareTamashii({ cwd });
 
     const isDirectoryRes = await isDirectory(src);
     if ("error" in isDirectoryRes) {

@@ -24,6 +24,7 @@ export default class Link extends Command {
     installFlags: Flags.string({ description: `Flags to pass "yarn add" or "npm install"` }),
     npm: Flags.boolean({ description: "Use npm instead of yarn" }),
     verbose: Flags.boolean({ description: "Print verbose output" }),
+    yarn2: Flags.boolean({ description: "Use yarn 2+ instead of yarn classic" }),
   };
 
   async run(): Promise<void> {

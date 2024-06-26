@@ -91,7 +91,7 @@ Links package
 
 ```
 USAGE
-  $ tamashii link SOURCE [--cwd <value>] [--installFlags <value>] [--npm] [--verbose]
+  $ tamashii link SOURCE [--cwd <value>] [--installFlags <value>] [--npm] [--verbose] [--yarn2]
 
 ARGUMENTS
   SOURCE  Package path
@@ -101,6 +101,7 @@ FLAGS
   --installFlags=<value>  Flags to pass "yarn add" or "npm install"
   --npm                   Use npm instead of yarn
   --verbose               Print verbose output
+  --yarn2                 Use yarn 2+ instead of yarn classic
 
 DESCRIPTION
   Links package

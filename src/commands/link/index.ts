@@ -56,6 +56,7 @@ export default class Link extends Command {
       force: true,
       npm: flags.npm,
       verbose: flags.verbose,
+      yarn2: flags.yarn2,
     });
 
     const pkg = path.join(TAMASHII_PACKAGES_DIR, packageName);

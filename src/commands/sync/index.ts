@@ -33,6 +33,7 @@ type Options = {
   force: boolean | undefined;
   npm: boolean | undefined;
   verbose: boolean | undefined;
+  yarn2: boolean | undefined;
 };
 
 type SyncResult = "ignored" | "invalid-symlink" | "skipped" | "synced";
@@ -64,8 +65,9 @@ Consider placing this command in the "preinstall" section of npm scripts so that
   static flags = {
     cwd: Flags.string({ description: "Current working directory of the child process" }),
     force: Flags.boolean({ description: "never skip even if no changes detected at source" }),
-    npm: Flags.boolean({ description: "Use npm instead of yarn" }),
+    npm: Flags.boolean({ description: "Use npm instead of yarn classic" }),
     verbose: Flags.boolean({ description: "Print verbose output" }),
+    yarn2: Flags.boolean({ description: "Use yarn 2+ instead of yarn classic" }),
   };
 
   static syncAll = async (self: Command, packages: string[], options: Options) =>
@@ -118,8 +120,12 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     const intermediate = path.join(cwd, TAMASHII_INTERMEDIATE_DIR, packageName);
     const pkg = path.join(cwd, TAMASHII_PACKAGES_DIR, packageName);
 
-    const install = options.npm ? "npm install" : "yarn";
-    const runScript = options.npm ? "npm run" : "yarn";
+    const install = options.npm
+      ? "npm install --production=false"
+      : options.yarn2
+      ? "yarn workspaces focus"
+      : "yarn --production=false";
+    const runScript = options.npm ? "npm run" : "yarn run";
     const isInIntermediateDir = cwd.includes(TAMASHII_DIR);
 
     if (cwd.includes("node_modules")) {
@@ -204,7 +210,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
     if (hasPreRefresh) {
       await queue.add(() =>
         execAsync(
-          `${install} --production=false`,
+          install,
           { cwd: intermediate, env: { ...process.env, SKIP_TAMASHII_SYNC: "yes" } },
           options.verbose,
         ),
@@ -280,6 +286,7 @@ Consider placing this command in the "preinstall" section of npm scripts so that
       force: flags.force,
       npm: flags.npm,
       verbose: flags.verbose,
+      yarn2: flags.yarn2,
     });
   }
 }

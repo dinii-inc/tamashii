@@ -29,7 +29,7 @@ $ npm install -g @dinii-inc/tamashii
 $ tamashii COMMAND
 running command...
 $ tamashii (--version)
-@dinii-inc/tamashii/1.4.5 darwin-arm64 node-v20.8.0
+@dinii-inc/tamashii/1.4.6 darwin-arm64 node-v20.8.0
 $ tamashii --help [COMMAND]
 USAGE
   $ tamashii COMMAND
@@ -110,7 +110,7 @@ EXAMPLES
   $ tamashii link ../path/to/your/internal/package
 ```
 
-_See code: [src/commands/link/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.5/src/commands/link/index.ts)_
+_See code: [src/commands/link/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.6/src/commands/link/index.ts)_
 
 ## `tamashii refresh [PACKAGE]`
 
@@ -144,7 +144,7 @@ EXAMPLES
   $ tamashii refresh your-internal-package
 ```
 
-_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.5/src/commands/refresh/index.ts)_
+_See code: [src/commands/refresh/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.6/src/commands/refresh/index.ts)_
 
 ## `tamashii sync [PACKAGE]`
 
@@ -184,7 +184,7 @@ EXAMPLES
   $ tamashii sync your-internal-package
 ```
 
-_See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.5/src/commands/sync/index.ts)_
+_See code: [src/commands/sync/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.6/src/commands/sync/index.ts)_
 
 ## `tamashii vscode`
 
@@ -198,7 +198,7 @@ DESCRIPTION
   Shows instruction to make your development experience with tamashii and VSCode more comfortable
 ```
 
-_See code: [src/commands/vscode/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.5/src/commands/vscode/index.ts)_
+_See code: [src/commands/vscode/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.6/src/commands/vscode/index.ts)_
 
 ## `tamashii zip SOURCE`
 
@@ -218,5 +218,5 @@ EXAMPLES
   $ tamashii zip ../path/to/your/internal/package
 ```
 
-_See code: [src/commands/zip/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.5/src/commands/zip/index.ts)_
+_See code: [src/commands/zip/index.ts](https://github.com/dinii-inc/tamashii/blob/v1.4.6/src/commands/zip/index.ts)_
 <!-- commandsstop -->
